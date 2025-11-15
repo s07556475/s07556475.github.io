@@ -297,8 +297,11 @@
         </div>
     </div>
 
-    <script>
+<script>
         let currentDataInfo = null;
+        
+        // ** 您的 Render API 基础地址 **
+        const API_BASE_URL = 'https://spatial-igoi.onrender.com';
         
         // 上传文件
         async function uploadFile() {
@@ -316,7 +319,8 @@
             formData.append('file', file);
             
             try {
-                const response = await axios.post('/api/upload', formData, {
+                // *** 关键修改: 将 '/api/upload' 替换为 `${API_BASE_URL}/api/upload` ***
+                const response = await axios.post(`${API_BASE_URL}/api/upload`, formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
@@ -332,7 +336,14 @@
                     statusDiv.innerHTML = `<div class="alert alert-error">${response.data.message}</div>`;
                 }
             } catch (error) {
-                statusDiv.innerHTML = `<div class="alert alert-error">上传失败: ${error.message}</div>`;
+                // 为了调试方便，捕获原始错误信息
+                let errorMessage = error.message;
+                if (error.response && error.response.data && error.response.data.message) {
+                    errorMessage = error.response.data.message;
+                } else if (error.response && error.response.status) {
+                    errorMessage = `请求失败，状态码: ${error.response.status} (${error.response.statusText})`;
+                }
+                statusDiv.innerHTML = `<div class="alert alert-error">上传失败: ${errorMessage}</div>`;
             } finally {
                 loading.style.display = 'none';
             }
@@ -363,6 +374,7 @@
             
             // 添加变量选项
             currentDataInfo.columns.forEach(col => {
+                // 排除内部使用的 'id' 和 'city' 列
                 if (col !== 'id' && col !== 'city') {
                     const option1 = new Option(col, col);
                     const option2 = new Option(col, col);
@@ -398,7 +410,8 @@
             resultsDiv.innerHTML = '';
             
             try {
-                const response = await axios.post('/api/moran', {
+                // *** 关键修改: 将 '/api/moran' 替换为 `${API_BASE_URL}/api/moran` ***
+                const response = await axios.post(`${API_BASE_URL}/api/moran`, {
                     variable: variable,
                     years: selectedYears.includes('all') ? null : selectedYears
                 });
@@ -409,7 +422,13 @@
                     resultsDiv.innerHTML = `<div class="alert alert-error">${response.data.message}</div>`;
                 }
             } catch (error) {
-                resultsDiv.innerHTML = `<div class="alert alert-error">分析失败: ${error.message}</div>`;
+                let errorMessage = error.message;
+                if (error.response && error.response.data && error.response.data.message) {
+                    errorMessage = error.response.data.message;
+                } else if (error.response && error.response.status) {
+                    errorMessage = `请求失败，状态码: ${error.response.status} (${error.response.statusText})`;
+                }
+                resultsDiv.innerHTML = `<div class="alert alert-error">分析失败: ${errorMessage}</div>`;
             } finally {
                 loading.style.display = 'none';
             }
@@ -476,7 +495,8 @@
             resultsDiv.innerHTML = '';
             
             try {
-                const response = await axios.post('/api/regression', {
+                // *** 关键修改: 将 '/api/regression' 替换为 `${API_BASE_URL}/api/regression` ***
+                const response = await axios.post(`${API_BASE_URL}/api/regression`, {
                     dependent_var: dependentVar,
                     independent_vars: independentVars,
                     model_type: modelType
@@ -488,7 +508,13 @@
                     resultsDiv.innerHTML = `<div class="alert alert-error">${response.data.message}</div>`;
                 }
             } catch (error) {
-                resultsDiv.innerHTML = `<div class="alert alert-error">回归分析失败: ${error.message}</div>`;
+                let errorMessage = error.message;
+                if (error.response && error.response.data && error.response.data.message) {
+                    errorMessage = error.response.data.message;
+                } else if (error.response && error.response.status) {
+                    errorMessage = `请求失败，状态码: ${error.response.status} (${error.response.statusText})`;
+                }
+                resultsDiv.innerHTML = `<div class="alert alert-error">回归分析失败: ${errorMessage}</div>`;
             } finally {
                 loading.style.display = 'none';
             }
@@ -545,4 +571,5 @@
         }
     </script>
 </body>
+
 </html>
